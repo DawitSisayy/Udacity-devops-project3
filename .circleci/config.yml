@@ -145,8 +145,9 @@ jobs:
             npm audit --audit-level=critical
             exit 1
       - slack/notify:
-	         event: fail
-	         template: basic_fail_1
+          event: fail
+          template: basic_fail_1
+	      
   # deploy-infrastructure:
   #   docker:
   #     # Docker image here that supports AWS CLI
