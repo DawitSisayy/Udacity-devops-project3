@@ -4,6 +4,16 @@ orbs:
   slack: circleci/slack@4.1
 
 commands:
+  install_ansible:
+    description: Install Ansible
+    steps:
+      - run: 
+          name: Install Ansible
+          command: |
+           sudo apt update
+           sudo apt install software-properties-common -y
+           sudo add-apt-repository --yes --update ppa:ansible/ansible
+           sudo apt install ansible -y
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -215,16 +225,20 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update --no-cache tar gzip ansible aws-cli
+      
       - attach_workspace:
           at: ~/
-          
+     
+      - install_ansible
+
       - run:
           name: Configure server
           command: |
             # Your code here
             cd .circleci/ansible
+            cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
-      # Here's where you will add some code to rollback on failure  
+       
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}    
 
@@ -236,49 +250,23 @@ jobs:
       # Checkout code from git
       - checkout
       - run:
-          name: Install dependencies
-          command: |
-            apk add --update --no-cache tar gzip nodejs npm aws-cli curl
-            # sudo apt install -y tar gzip curl
-            # curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            # unzip -qq awscliv2.zip
-            # sudo ./aws/install
-      - restore_cache:
-          keys: [backend-build] 
-      # - attach_workspace:
-      #     at: ~/
-      
-      - run:
           name: Run migrations
           command: |
-            # # Your code here
             cd backend
             npm install
-            # npm run build
-            npm run migrations >> migrations.txt
+            npm run migrations > migrations.txt
 
-            # export TYPEORM_HOST=$(aws cloudformation list-exports --query "Exports[?Name==\`EndpointAddress-${CIRCLE_WORKFLOW_ID:0:7}\`].Value" --output text)
-            # echo $TYPEORM_HOST
-            # echo TYPEORM_HOST=$TYPEORM_HOST >> ~/project/backend/.env
-            # cd backend
-            # npm run migrations >> migrations_dump.txt
-            # cat migrations_dump.txt
-
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - project/backend
       - run:
           name: Send migration results to kvdb
           command: |
-            # Your code here
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
               curl --insecure https://kvdb.io/L8WY5ToZYZNmcgdX74bWAK/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
-     # Here's where you will add some code to rollback on failure      
+                 
       - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7} 
+          # workflow_id: ${CIRCLE_WORKFLOW_ID:0:7} 
+      - revert-migrations
 
   # deploy-frontend:
   #   docker:
