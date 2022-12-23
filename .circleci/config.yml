@@ -1,7 +1,7 @@
 version: 2.1
 
-orbs:
-  slack: circleci/slack@4.1
+# orbs:
+#   slack: circleci/slack@4.1
 
 # commands:
 #   install_ansible:
@@ -51,7 +51,7 @@ orbs:
   #           SUCCESS=$(curl --insecure https://kvdb.io/L8WY5ToZYZNmcgdX74bWAK/migration_${CIRCLE_WORKFLOW_ID:0:7})
   #           echo $SUCCESS
   #           if(( $SUCCESS==1 )); 
-            then
+             # then
   #            cd ~/project/backend
   #            npm install
   #            npm run migrations:revert
