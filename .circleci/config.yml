@@ -20,18 +20,17 @@ commands:
     parameters:
       # Add parameter here 
       workflow_id:
+        default: "${CIRCLE_WORKFLOW_ID:0:7}" 
         type: string
-        default: '${CIRCLE_WORKFLOW_ID}'  
+        
     steps:
       - run:
           name: Destroy environments
           when: on_fail
           command: |
             aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
-            aws cloudformation delete-stack \
-              --stack-name udapeople-backend-<<parameters.workflow_id>>
-            aws cloudformation delete-stack \
-              --stack-name udapeople-frontend-<<parameters.workflow_id>>
+            aws cloudformation delete-stack --stack-name "udapeople-backend-<<parameters.workflow_id>>"
+            aws cloudformation delete-stack --stack-name "udapeople-frontend-<<parameters.workflow_id>>"
             
 
   revert-migrations:
@@ -39,7 +38,7 @@ commands:
     parameters:
       # Add parameter here  
       workflow_id:
-        default: '${CIRCLE_WORKFLOW_ID}'   
+        default: "${CIRCLE_WORKFLOW_ID:0:7}"   
         type: string  
 
     steps:
@@ -243,8 +242,6 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             -'34:c7:8f:99:a3:15:c4:2e:b3:aa:ef:2c:2c:85:78:ce'
-  
-      
       - attach_workspace:
           at: ~/
      
@@ -253,13 +250,12 @@ jobs:
       - run:
           name: Configure server
           command: |
-            # Your code here
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
        
       - destroy-environment:
-          # workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}    
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}    
 
   run-migrations:
     docker:
@@ -281,8 +277,7 @@ jobs:
             then
               curl --insecure https://kvdb.io/L8WY5ToZYZNmcgdX74bWAK/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
-
-      - destroy-environment:
+      - destroy-environment
       - revert-migrations
 
   # deploy-frontend:
