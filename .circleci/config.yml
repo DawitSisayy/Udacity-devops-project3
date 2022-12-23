@@ -3,59 +3,59 @@ version: 2.1
 # orbs:
 #   slack: circleci/slack@4.1
 
-# commands:
-#   install_ansible:
-#     description: Install Ansible
-#     steps:
-#       - run: 
-#           name: Install Ansible
-#           command: |
-#            sudo apt update
-#            sudo apt install software-properties-common -y
-#            sudo add-apt-repository --yes --update ppa:ansible/ansible
-#            sudo apt install ansible -y
-  # destroy-environment:
-  #   description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-  #   parameters:
-  #     # Add parameter here 
-  #     workflow_id:
-  #       type: string
-  #       # default: '${CIRCLE_WORKFLOW_ID}'  
-  #   steps:
-  #     - run:
-  #         name: Destroy environments
-  #         when: on_fail
-  #         command: |
-  #           aws cloudformation delete-stack \
-  #             --stack-name udapeople-backend-<<parameters.workflow_id>>
-  #           aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
-  #           aws cloudformation delete-stack \
-  #             --stack-name udapeople-frontend-<<parameters.workflow_id>>
+commands:
+  install_ansible:
+    description: Install Ansible
+    steps:
+      - run: 
+          name: Install Ansible
+          command: |
+           sudo apt update
+           sudo apt install software-properties-common -y
+           sudo add-apt-repository --yes --update ppa:ansible/ansible
+           sudo apt install ansible -y
+
+  destroy-environment:
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      # Add parameter here 
+      workflow_id:
+        type: string
+        default: '${CIRCLE_WORKFLOW_ID}'  
+    steps:
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: |
+            aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
+            aws cloudformation delete-stack \
+              --stack-name udapeople-backend-<<parameters.workflow_id>>
+            aws cloudformation delete-stack \
+              --stack-name udapeople-frontend-<<parameters.workflow_id>>
             
 
-  # revert-migrations:
-  #   description: Revert the last migration if successfully run in the current workflow.
-  #   parameters:
-  #     # Add parameter here  
-  #     workflow_id:
-  #       # default: '${CIRCLE_WORKFLOW_ID}'   
-  #       type: string  
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow.
+    parameters:
+      # Add parameter here  
+      workflow_id:
+        default: '${CIRCLE_WORKFLOW_ID}'   
+        type: string  
 
-  #   steps:
-  #     - run:
-  #         name: Revert migrations
-  #         # Add when this will run
-  #         when: on_fail
-  #         command: |
-  #           # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-  #           SUCCESS=$(curl --insecure https://kvdb.io/L8WY5ToZYZNmcgdX74bWAK/migration_${CIRCLE_WORKFLOW_ID:0:7})
-  #           echo $SUCCESS
-  #           if(( $SUCCESS==1 )); 
-             # then
-  #            cd ~/project/backend
-  #            npm install
-  #            npm run migrations:revert
-  #           fi
+    steps:
+      - run:
+          name: Revert migrations
+          # Add when this will run
+          when: on_fail
+          command: |
+            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
+            SUCCESS=$(curl --insecure https://kvdb.io/L8WY5ToZYZNmcgdX74bWAK/migration_<<parameters.workflow_id>>")
+            if(( $SUCCESS==1 )); 
+             then
+             cd ~/project/backend
+             npm install
+             npm run migrations:revert
+            fi
             
 jobs:
   build-frontend:
@@ -194,7 +194,7 @@ jobs:
           name: Install dependencies
           command: |
              yum install -y tar gzip
-      # - run: yum install -y tar gzip
+    
 
       - run:
           name: Ensure back-end infrastructure exists
@@ -224,8 +224,6 @@ jobs:
             --output text --filter Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7} >> inventory.txt 
             cat inventory.txt
 
-            # --filters "Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-
       - persist_to_workspace:
           root: ~/
           paths:
@@ -235,63 +233,58 @@ jobs:
       #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
 
-  # configure-infrastructure:
-  #   docker:
-  #     # Docker image here that supports Ansible
-  #     - image: python:3.10-alpine3.16
-  #   steps:
-  #     # Checkout code from git
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           -'34:c7:8f:99:a3:15:c4:2e:b3:aa:ef:2c:2c:85:78:ce'
+  configure-infrastructure:
+    docker:
+      # Docker image here that supports Ansible
+      # - image: python:3.10-alpine3.16
+      - image: cimg/base: stable
+    steps:
+      # Checkout code from git
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            -'34:c7:8f:99:a3:15:c4:2e:b3:aa:ef:2c:2c:85:78:ce'
   
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update --no-cache tar gzip ansible aws-cli
       
-  #     - attach_workspace:
-  #         at: ~/
+      - attach_workspace:
+          at: ~/
      
-  #     - install_ansible
+      - install_ansible
 
-  #     - run:
-  #         name: Configure server
-  #         command: |
-  #           # Your code here
-  #           cd .circleci/ansible
-  #           cat inventory.txt
-  #           ansible-playbook -i inventory.txt configure-server.yml
+      - run:
+          name: Configure server
+          command: |
+            # Your code here
+            cd .circleci/ansible
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml
        
-  #     - destroy-environment:
-  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}    
+      - destroy-environment:
+          # workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}    
 
-  # run-migrations:
-  #   docker:
-  #     # Docker image here that supports NodeJS
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Run migrations
-  #         command: |
-  #           cd backend
-  #           npm install
-  #           npm run migrations > migrations_dump.txt
+  run-migrations:
+    docker:
+      # Docker image here that supports NodeJS
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm install
+            npm run migrations > migrations_dump.txt
 
-  #     - run:
-  #         name: Send migration results to kvdb
-  #         command: |
-  #           if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
-  #           then
-  #             curl --insecure https://kvdb.io/L8WY5ToZYZNmcgdX74bWAK/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
-  #           fi
+      - run:
+          name: Send migration results to kvdb
+          command: |
+            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            then
+              curl --insecure https://kvdb.io/L8WY5ToZYZNmcgdX74bWAK/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
+            fi
 
-  #     - destroy-environment:
-  #          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7} 
-  #          type: string  
-  #     # - revert-migrations
+      - destroy-environment:
+      - revert-migrations
 
   # deploy-frontend:
   #   docker:
@@ -431,10 +424,10 @@ workflows:
           filters:
             branches:
               only: [master]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
-      # - run-migrations:
-      #     requires: [configure-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
       # - deploy-frontend:
       #     requires: [run-migrations]
       # - deploy-backend:
