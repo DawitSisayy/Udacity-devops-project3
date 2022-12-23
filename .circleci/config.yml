@@ -236,7 +236,6 @@ jobs:
   configure-infrastructure:
     docker:
       # Docker image here that supports Ansible
-      # - image: python:3.10-alpine3.16
       - image: cimg/base: stable
     steps:
       # Checkout code from git
