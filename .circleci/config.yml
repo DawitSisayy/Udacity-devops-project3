@@ -173,7 +173,8 @@ jobs:
             # npm audit fix --audit-level=critical --force
             # npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
-       -  save_cache:
+            
+      - save_cache:
           paths: [backend/node_modules]
           key: scanbackend-test
       
