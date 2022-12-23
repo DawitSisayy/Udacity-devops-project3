@@ -137,43 +137,50 @@ jobs:
           paths: [backend/node_modules]
           key: backend-test
  
-  # scan-frontend:
-  #   docker:
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     - checkout
-  #     - restore_cache:
-  #         keys: [frontend-build]
-  #     - run:
-  #         name: scan frontend dependencies
-  #         command: |
-  #           cd frontend
-  #           npm install
-  #           npm audit fix --audit-level=critical --force
-  #           npm audit fix --audit-level=critical --force
-  #           npm audit --audit-level=critical
-      
+  scan-frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [scanfrontend-test]
+      - run:
+          name: scan frontend dependencies
+          command: |
+            cd frontend
+            npm install
+            # npm audit fix --audit-level=critical --force
+            # npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
+      - save_cache:
+          paths: [frontend/node_modules]
+          key: scanfrontend-test
 
-  # scan-backend:
-  #   docker:
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     # Checkout code from git
-  #     - checkout
-  #     # Restore from cache
-  #     - restore_cache:
-  #         keys: [backend-build]
-  #     - run:
-  #         name: scan backend dependencies
-  #         command: |
-  #           cd frontend
-  #           npm install
-  #           npm audit fix --audit-level=critical --force
-  #           npm audit fix --audit-level=critical --force
-  #           npm audit --audit-level=critical
-  #     # - slack/notify:
-  #     #     event: fail
-  #     #     template: basic_fail_1
+  scan-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      # Checkout code from git
+      - checkout
+      # Restore from cache
+      - restore_cache:
+          keys: [scanbackend-test]
+      - run:
+          name: scan backend dependencies
+          command: |
+            cd frontend
+            npm install
+            # npm audit fix --audit-level=critical --force
+            # npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
+       -  save_cache:
+          paths: [backend/node_modules]
+          key: scanbackend-test
+      
+      
+      # - slack/notify:
+      #     event: fail
+      #     template: basic_fail_1
           
   # deploy-infrastructure:
   #   docker:
