@@ -24,17 +24,15 @@ commands:
            sudo apt install -y nodejs
 
 
-  install_ansible:
-    description: Install Ansible
-    steps:
-      - run: 
-         name: Install Ansible
-         command: |
-           sudo add-apt-repository --yes --update ppa:ansible/ansible
-           sudo apt install ansible 
-          #  sudo apt update
-          #  sudo apt install software-properties-common -y
-           
+  # install_ansible:
+  #   description: Install Ansible
+  #   steps:
+  #     - run: 
+  #        name: Install Ansible
+  #        command: |
+  #          sudo add-apt-repository --yes --update ppa:ansible/ansible
+  #          sudo apt install ansible 
+          
 
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -268,7 +266,16 @@ jobs:
       - attach_workspace:
           at: ~/
      
-      - install_ansible
+      # - install_ansible
+
+      - run:
+          name: Install dependencies
+          command: |
+            apk add curl
+            apk add --upgrade bash
+            apk add --update ansible
+            apk add openssh-client
+            pip3 install awscli
 
       - run:
          name: Configure server
