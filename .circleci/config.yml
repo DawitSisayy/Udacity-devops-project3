@@ -268,8 +268,8 @@ jobs:
       - install_ansible
 
       - run:
-          name: Configure server
-          command: |
+         name: Configure server
+         command: |
           #  cd .circleci/ansible
           #  cat inventory.txt
 
