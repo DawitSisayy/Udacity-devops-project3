@@ -28,12 +28,13 @@ commands:
     description: Install Ansible
     steps:
       - run: 
-          name: Install Ansible
-          command: |
-          #  sudo apt update
-          #  sudo apt install software-properties-common -y
+         name: Install Ansible
+         command: |
            sudo add-apt-repository --yes --update ppa:ansible/ansible
            sudo apt install ansible 
+          #  sudo apt update
+          #  sudo apt install software-properties-common -y
+           
 
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
