@@ -373,7 +373,7 @@ jobs:
       
       - install_nodejs
       - install_awscli
-      - install_ansible
+      # - install_ansible
 
       - run:
           name: Deploy backend
