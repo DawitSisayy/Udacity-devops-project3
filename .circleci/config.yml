@@ -404,7 +404,7 @@ jobs:
           name: Deploy frontend objects
           command: |
             cd frontend
-            sudo npm install -g npm@16.13.0
+            sudo npm install -g npm@14.17.0
             rm -rf node_modules
             npm install
             npm run build  
