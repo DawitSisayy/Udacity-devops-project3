@@ -472,7 +472,7 @@ jobs:
   cloudfront-update:
     docker:
       # Docker image here that supports AWS CLI
-       - image: amazon/aws-cli
+      - image: amazon/aws-cli
     steps:
       # Checkout code from git
       - checkout
@@ -501,7 +501,7 @@ jobs:
   # cleanup:
     docker:
       # Docker image here
-       - image: cimg/base:stable
+      - image: cimg/base:stable
     steps:
       # Checkout code from git
       - checkout
