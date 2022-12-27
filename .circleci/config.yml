@@ -420,8 +420,7 @@ jobs:
       # Checkout code from git
       - checkout
       - install_nodejs
-      - install_awscli
-       
+      - install_awscli       
       - run:
           name: Backend smoke test.
           command: |
@@ -429,15 +428,14 @@ jobs:
             BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
              --filters Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7} \
              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-             --output text)
-            
-            export API_URL="http://${BACKEND_IP}:3030"
-            # echo ${BACKEND_PUBLIC_IP}
+             --output text)       
+            export API_URL=http://${BACKEND_PUBLIC_IP}:3030
+            echo ${BACKEND_PUBLIC_IP}
             echo backend-${CIRCLE_WORKFLOW_ID:0:7}
             echo ${ API_URL}
-            if curl "${API_URL}/api/status" | grep "ok"
+            if curl -s ${API_URL}/api/status | grep "ok"
             then
-             exit 0
+              exit 0
             else
               exit 1
             fi
@@ -447,8 +445,8 @@ jobs:
           command: |
             # your code here
              URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com"            
-             echo ${URL} 
-             if curl -s ${URL} | grep "Welcome"
+             echo $URL
+             if curl -s $URL | grep "Welcome"
              then
                exit 0
              else
