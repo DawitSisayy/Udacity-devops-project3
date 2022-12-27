@@ -432,14 +432,14 @@ jobs:
              --output text)
             
             export API_URL="http://${BACKEND_IP}:3030"
-            echo ${BACKEND_PUBLIC_IP}
+            # echo ${BACKEND_PUBLIC_IP}
             echo backend-${CIRCLE_WORKFLOW_ID:0:7}
             echo ${ API_URL}
             if curl "${API_URL}/api/status" | grep "ok"
             then
              exit 0
             else
-              return 1
+              exit 1
             fi
 
       - run:
