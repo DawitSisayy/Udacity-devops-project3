@@ -470,8 +470,7 @@ jobs:
   #     # Here's where you will add some code to rollback on failure  
 
   cloudfront-update:
-    docker:
-      # Docker image here that supports AWS CLI
+    docker: 
       - image: amazon/aws-cli
     steps:
       # Checkout code from git
@@ -498,7 +497,7 @@ jobs:
       - revert-migrations    
    # Here's where you will add some code to rollback on failure  
 
-  # cleanup:
+  cleanup:
     docker:
       # Docker image here
       - image: cimg/base:stable
