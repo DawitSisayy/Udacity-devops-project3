@@ -429,12 +429,12 @@ jobs:
           command: |
             # your code here
             
-            BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
+            BACKEND_IP=$(aws ec2 describe-instances \
              --filters Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7} \
              --query 'Reservations[*].Instances[*].PublicIpAddress' \
              --output text)       
-            export API_URL=http://${BACKEND_PUBLIC_IP}:3030
-            echo ${BACKEND_PUBLIC_IP}
+            export API_URL=http://${BACKEND_IP}:3030
+            echo ${BACKEND_IP}
             echo backend-${CIRCLE_WORKFLOW_ID:0:7}
             echo ${API_URL}
             if curl -s ${API_URL}/api/status | grep "ok"
