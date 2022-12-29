@@ -362,136 +362,136 @@ jobs:
   
   
   
-  # deploy-frontend:
-  #   docker:
-  #     # Docker image here that supports AWS CLI
-  #     - image: cimg/base:stable
-  #   steps:
-  #     # Checkout code from git
-  #     - checkout
+  deploy-frontend:
+    docker:
+      # Docker image here that supports AWS CLI
+      - image: cimg/base:stable
+    steps:
+      # Checkout code from git
+      - checkout
 
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           -'34:c7:8f:99:a3:15:c4:2e:b3:aa:ef:2c:2c:85:78:ce'
-  #     - attach_workspace:
-  #         at: ~/
+      - add_ssh_keys:
+          fingerprints:
+            -'34:c7:8f:99:a3:15:c4:2e:b3:aa:ef:2c:2c:85:78:ce'
+      - attach_workspace:
+          at: ~/
       
-  #     - install_nodejs
-  #     - install_awscli
-  #     - install_ansible
-  #     - run:
-  #         name: Get backend url
-  #         command: |
-  #           # your code here
-  #           export BACKEND_IP=$(aws ec2 describe-instances \
-  #           --query 'Reservations[*].Instances[*].PublicIpAddress' \
-  #           --filter Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7} \
-  #           --output text)
+      - install_nodejs
+      - install_awscli
+      - install_ansible
+      - run:
+          name: Get backend url
+          command: |
+            # your code here
+            export BACKEND_IP=$(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filter Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7} \
+            --output text)
             
-  #           export API_URL="http://${BACKEND_IP}:3030"
-  #           echo "API_URL = ${API_URL}"
-  #           echo "API_URL=http://${BACKEND_IP}:3030" >> frontend/.env
-  #           cat frontend/.env
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo "API_URL=http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
  
-  #     - run:
-  #         name: Deploy frontend objects
-  #         command: |
-  #           cd frontend
-  #           npm install
-  #           npm run build  
-  #           aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-  #     - destroy-environment
-  #     - revert-migrations
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build  
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - destroy-environment
+      - revert-migrations
 
 
         
   
   
-  # deploy-backend:
-  #   docker:
-  #     # Docker image here that supports Ansible
-  #     - image: cimg/base:stable
-  #   steps:
-  #     # Checkout code from git
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           -'34:c7:8f:99:a3:15:c4:2e:b3:aa:ef:2c:2c:85:78:ce'
-  #     - attach_workspace:
-  #         at: ~/
+  deploy-backend:
+    docker:
+      # Docker image here that supports Ansible
+      - image: cimg/base:stable
+    steps:
+      # Checkout code from git
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            -'34:c7:8f:99:a3:15:c4:2e:b3:aa:ef:2c:2c:85:78:ce'
+      - attach_workspace:
+          at: ~/
       
-  #     - install_nodejs
-  #     - install_awscli
-  #     - install_ansible
+      - install_nodejs
+      - install_awscli
+      - install_ansible
 
-  #     - run:
-  #         name: Deploy backend
-  #         command: |
-  #           cd backend
-  #           npm i
-  #           npm run build
-  #           cd ..
+      - run:
+          name: Deploy backend
+          command: |
+            cd backend
+            npm i
+            npm run build
+            cd ..
 
-  #           cd .circleci/ansible
-  #           mkdir files
-  #           cd files
-  #           tar -C ../../../backend -czvf artifact.tar.gz . 
-  #           cd ../
+            cd .circleci/ansible
+            mkdir files
+            cd files
+            tar -C ../../../backend -czvf artifact.tar.gz . 
+            cd ../
 
-  #           echo "Contents  of the inventory.txt file is -------"
-  #           cat inventory.txt
-  #           ansible-playbook -i inventory.txt deploy-backend.yml
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
 
-  #     - destroy-environment
-  #     - revert-migrations
+      - destroy-environment
+      - revert-migrations
 
-  # smoke-test:
-  #   docker:
-  #     # Lightweight Docker image 
-  #     - image: cimg/base:stable
-  #   steps:
-  #     # Checkout code from git
-  #     - checkout
-  #     - install_nodejs
-  #     - install_awscli 
+  smoke-test:
+    docker:
+      # Lightweight Docker image 
+      - image: cimg/base:stable
+    steps:
+      # Checkout code from git
+      - checkout
+      - install_nodejs
+      - install_awscli 
 
-  #     - attach_workspace:
-  #         at: ~/      
-  #     - run:
-  #         name: Backend smoke test.
-  #         command: |
-  #           # your code here
+      - attach_workspace:
+          at: ~/      
+      - run:
+          name: Backend smoke test.
+          command: |
+            # your code here
             
-  #           BACKEND_IP=$(aws ec2 describe-instances \
-  #            --filters Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7} \
-  #            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-  #            --output text)       
-  #           export API_URL=http://${BACKEND_IP}:3030
-  #           echo ${BACKEND_IP}
-  #           echo backend-${CIRCLE_WORKFLOW_ID:0:7}
-  #           echo ${API_URL}
-  #           if curl -s ${API_URL}/api/status | grep "ok"
-  #           then
-  #             exit 0
-  #           else
-  #             exit 1
-  #           fi
+            BACKEND_IP=$(aws ec2 describe-instances \
+             --filters Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7} \
+             --query 'Reservations[*].Instances[*].PublicIpAddress' \
+             --output text)       
+            export API_URL=http://${BACKEND_IP}:3030
+            echo ${BACKEND_IP}
+            echo backend-${CIRCLE_WORKFLOW_ID:0:7}
+            echo ${API_URL}
+            if curl -s ${API_URL}/api/status | grep "ok"
+            then
+              exit 0
+            else
+              exit 1
+            fi
 
-  #     - run:
-  #         name: Frontend smoke test.
-  #         command: |
-  #           # your code here
-  #            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com"            
-  #            echo $URL
-  #            if curl -s $URL | grep "Welcome"
-  #            then
-  #              exit 1
-  #            else
-  #              exit 1
-  #            fi
-  #     - destroy-environment
-  #     - revert-migrations     
-  # #     # Here's where you will add some code to rollback on failure  
+      - run:
+          name: Frontend smoke test.
+          command: |
+            # your code here
+             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website.${AWS_DEFAULT_REGION}.amazonaws.com"            
+             echo $URL
+             if curl -s $URL | grep "Welcome"
+             then
+               exit 1
+             else
+               exit 1
+             fi
+      - destroy-environment
+      - revert-migrations     
+  #     # Here's where you will add some code to rollback on failure  
 
   # cloudfront-update:
   #   docker: 
@@ -576,10 +576,10 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
